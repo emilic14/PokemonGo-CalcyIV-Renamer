@@ -1,5 +1,14 @@
+#!python
+
 import pokemonlib
 import argparse
+
+import logging
+import logging.config
+
+logging.config.fileConfig('logging.conf')
+
+logger = logging.getLogger('PokemonGo')
 
 skip_count = 0
 
@@ -14,48 +23,38 @@ parser.add_argument('--no-rename', action='store_const', const=True, default=Fal
                     help="Don't rename, useful for just loading every pokemon into calcy IV history for CSV export.")
 parser.add_argument('--wait-after-error', action='store_const', const=True, default=False,
                     help="Upon calcy IV error, wait for user input")
-parser.add_argument('--max-retries', type=int, default=5, help="Maximum retries, set to 0 for unlimited")
-parser.add_argument('--sleep_short', type=float, default=0.7)
-parser.add_argument('--sleep_long', type=float, default=1.5)
-parser.add_argument('--ok_button_x', type=float, default=86.46)
-parser.add_argument('--ok_button_y', type=float, default=57.08)
-parser.add_argument('--edit_line_x', type=float, default=6.67)
-parser.add_argument('--edit_line_y', type=float, default=57.29)
-parser.add_argument('--paste_button_x', type=float, default=11.38)
-parser.add_argument('--paste_button_y', type=float, default=64.53)
+parser.add_argument('--max-retries', type=int, default=5,
+                    help="Maximum retries, set to 0 for unlimited")
 
 args = parser.parse_args()
 
 p = pokemonlib.PokemonGo(args.device_id)
+
 while True:
-    p.tap(7.40, 46.87, args.sleep_long) # Calcy IV
+    p.click_calcyIV_button()
     try:
         p.check_calcy_iv()
         skip_count = 0
-    except pokemonlib.RedBarError:
-        print("RedBarError, continuing")
-        continue
     except pokemonlib.CalcyIVError:
-        print("CalcyIVError")
+        logger.info("CalcyIVError")
+        skip_count = skip_count + 1
         if args.wait_after_error:
             input("CalcyIVError, Press enter to continue")
-        skip_count = skip_count + 1
         if skip_count > args.max_retries and args.max_retries != 0:
-            print("CalcyIVError 5 times in a row, skipping to next pokemon")
-            p.swipe(97.22, 70.31, 4.62, 70.31, args.sleep_short)
+            logger.info(
+                "CalcyIVError 5 times in a row, skipping to next pokemon")
+            p.swipe_next()
             skip_count = 0
         continue
 
     if not args.no_rename:
-        p.tap(54.91, 69.53, 0) # Dismiss Calcy IV
-        p.tap(50.74, 47.97, args.sleep_short) # Rename
+        p.dismiss_calcyIV_overlay()
+        p.click_rename_button()
         if args.nopaste:
-            p.tap(92.59, 88.54, args.sleep_short) # Press in the edit box
-            p.swipe(args.edit_line_x, args.edit_line_y, args.edit_line_x, args.edit_line_y, args.sleep_short, 600) # Use swipe to simulate a long press to bring up copy/paste dialog
-            #p.tap(24.63, 50.42, args.sleep_short) # Press paste
-            p.tap(args.paste_button_x, args.paste_button_y, args.sleep_short) # Press paste
+            p.select_text_in_rename_input()
+            p.click_paste_button()
         else:
-            p.key(279, args.sleep_short) # Paste into rename
-        p.tap(86.48, 57.08, args.sleep_short) # Press OK on edit line
-        p.tap(51.48, 55.47, args.sleep_long) # Press OK on Pokemon go rename dialog
-    p.swipe(97.22, 70.31, 4.63, 70.31, args.sleep_short) # Swipe to next pokemon
+            p.paste_into_rename()
+        p.hide_keyboard()
+        p.click_ok_on_rename_dialog()
+    p.swipe_next()
