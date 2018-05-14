@@ -272,6 +272,7 @@ class PokemonGo(object):
         retries = self.__check_calcy_iv_retries
         calcyIV_status = CalcyIVStatus.NOTHING
         while retries > 0 and calcyIV_status == CalcyIVStatus.NOTHING:
+            retries -= 1
             rgb_image = self.screencap().convert('RGB')
             calcyIV_status = self.__check_calcy_iv_img(rgb_image)
         if calcyIV_status is not CalcyIVStatus.OK:
