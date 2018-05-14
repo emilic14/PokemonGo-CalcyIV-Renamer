@@ -3,10 +3,6 @@ import logging.config
 
 from PIL import Image
 
-from cv2 import cv2
-import numpy as np
-from os import listdir
-
 logging.config.fileConfig('logging.conf')
 logger = logging.getLogger('PokemonGo')
 

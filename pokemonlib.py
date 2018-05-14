@@ -1,6 +1,5 @@
 import sys
 import time
-import argparse
 import subprocess
 import configparser
 import logging
