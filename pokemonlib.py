@@ -3,7 +3,7 @@ import time
 import subprocess
 import configparser
 import logging
-from enum import Enum, auto
+from enum import Enum
 from PIL import Image
 from io import BytesIO
 import calibration
@@ -25,11 +25,11 @@ class RenameButtonNotFoundError(Exception):
 
 class CalcyIVStatus(Enum):
     # CalcyIV overlay found
-    OK = auto()
+    OK = 1
     # CalcyIV error found
-    KO = auto()
+    KO = 2
     # CalcyIV overlay NOT found
-    NOTHING = auto()
+    NOTHING = 3
 
 
 class PokemonGo(object):
