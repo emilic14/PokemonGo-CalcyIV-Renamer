@@ -137,9 +137,8 @@ class PokemonGo(object):
 
     def click_rename_button(self):
         logger.info("Click rename button")
-        renameButtonX = self.__find_rename_button_x()
         self.__tap(
-            renameButtonX,
+            self.get_x(50),
             self.__renameButtonY,
             self.config.getfloat('SleepShort')
         )
@@ -300,16 +299,6 @@ class PokemonGo(object):
         self.__renameButtonY = y
         logger.info('Found rename button Y coordinate: {}'.format(
             self.__renameButtonY))
-
-    def __find_rename_button_x(self):
-        try:
-            # Try to find the rename button on the previous screenshot (before CalcyIV overlay dismiss)
-            # Depending on the phone resolution and overlay height, the rename button could be found (or hidden by the overlay)
-            return self.__do_find_rename_button_x()
-        except RenameButtonNotFoundError:
-            # Re-try with a new screenshot (after CalcyIV overlay dismiss)
-            self.screencap()
-            return self.__do_find_rename_button_x()
 
     def __do_find_rename_button_x(self):
         rgb_image = self.image.convert('RGB')
